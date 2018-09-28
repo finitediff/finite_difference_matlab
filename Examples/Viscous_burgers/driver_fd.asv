@@ -1,0 +1,83 @@
+addpath('../../Core')
+clc; clear all; close all; beep off;
+
+% mathcalE = 2.7; % stable wave
+mathcalE = 7; %
+
+%epsilon for convergence study
+%eps = 1./2
+
+%Set the domain variables.
+s.L = -20;
+s.R = 20;
+dom = linspace(s.L,s.R,1600*(1./eps).^2);
+
+%
+
+%Write the boundary functions
+bc_L_fun = @(U_n,U_o,K,H,p)[U_n(1)-2];
+bc_R_fun = @(U_n,U_o,K,H,p)[U_n(end)];
+bc_L_jac_fun = @(U_n,U_o,K,H,p)(1);
+bc_R_jac_fun = @(U_n,U_o,K,H,p)(1);
+
+% -------------------------------------------------------------------------
+% Finite Difference Code
+% -------------------------------------------------------------------------
+
+%U_o = U_n+0.03*exp(-2*(dom+2).^2);
+
+% time steps
+time_steps = 1000;
+
+
+% delta x and delta y
+H = sqrt(eps)*(dom(2)-dom(1))
+K = eps*(.1)
+
+startFun = @(x)[1-tanh(x./2)]
+U_o = startFun(dom)
+U_o = U_o+.5*exp(-2*(dom+2).^2);
+U_n = U_o;
+
+% time evolution code tolerance
+tol = 1e-8;
+p = {}
+
+figure;
+U_orig = U_o;
+Ubar = U_n;
+
+for j = 1:time_steps
+    
+    j
+    
+    U_n = finite_diff_advance(U_n,U_o,K,H,p,tol,@fd_F,@fd_jac, ...
+    bc_L_fun,bc_R_fun,bc_L_jac_fun,bc_R_jac_fun);
+
+    clf;
+    hold on;
+    plot(dom,Ubar,'--r','LineWidth',4);
+    plot(dom,U_orig,'-k','LineWidth',1);
+    plot(dom,U_n,'-g','LineWidth',2);
+    axis([s.L,s.R,-.2,2.2]);
+    drawnow;
+
+
+    U_o = U_n;
+    
+end
+
+%determine |u-u*|
+norm_U = norm(U_o - startFun(dom)+.5*exp(-2*(dom+2).^2));
+
+norm_U
+
+
+
+
+
+
+
+
+
+    
