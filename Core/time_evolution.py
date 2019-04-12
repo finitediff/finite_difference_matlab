@@ -92,9 +92,6 @@ def create_code(U,parameters,f0,f1,H,BU,file_path):
     
     # Jacobian of f1
     Df1 = compute_jacobian(f1,U)
-    
-    # Jacobian of G
-    #DG = compute_jacobian(G,U)
         
     # get the derivative of B(U)
     dBU = []
@@ -145,6 +142,11 @@ def create_code(U,parameters,f0,f1,H,BU,file_path):
         
     K,H = symbols('K,H')
         
+
+    fd_U = []
+    for j in range(0,len(U)):
+        fd_U.append((Wn[j]+Wo[j])/2)
+
     fd_Ut = []
     for j in range(0,len(U)):
         fd_Ut.append((Wn[j]-Wo[j])/K)
@@ -164,11 +166,12 @@ def create_code(U,parameters,f0,f1,H,BU,file_path):
     for j in range(0,len(U)):
         temp = F[j]
         for k in range(0,len(U)):
-            temp = temp.subs(U[k],Wn[k])
+            temp = temp.subs(U[k],fd_U[k])
             temp = temp.subs(U_t[k],fd_Ut[k])
             temp = temp.subs(U_x[k],fd_Ux[k])
             temp = temp.subs(U_xx[k],fd_Uxx[k])
         G.append(temp)
+        print(G)
             
     # Jacobian of G, a 3 dimensional array with first component corresponding to the 
     # equation, second component corresponding to the system variable, and third 
